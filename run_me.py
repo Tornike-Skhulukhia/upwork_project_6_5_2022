@@ -6,17 +6,19 @@ Use Linux soft links.
 
 Also store log what changes were made.
 
-Example before structure of folder:
+Example
+----------------------------------------------
+
+Structure of folder before:
 
 . file_1.py                                                        # file with short name
 . loooooooooooooooooooooooooooooooooooooooooooooong_file.py        # file with long name (allowed max length is controlled below)
 
-After processing:
+Structure of folder after:
 
 . file_1.py                                                        # not changed
 . loooooooooooooooooooooooooooooooooooooooooooooong_file.py        # old file name still exists, but now it is a soft link to smaller name-having file below this line 
 . looooooooooooooooooooooooooooooooo.py                            # file that upper file links to. Only filenames became shorter, extension remains as it may be useful for apps using it
-
 
 Next time we run it again, it will try to do similar renaming only for files that are not links.
 
