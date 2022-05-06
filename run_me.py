@@ -142,8 +142,8 @@ def replace_longer_filenames_with_links_to_same_files_with_shorter_names(
 
 # GO
 if __name__ == "__main__":
-    # all long files will be processed in any subdirectory of this folder
-    folder_path = "/home/tornike/Desktop/demos/upwork_demos/3/demo_folder_with_files/"
+    # all long files will be processed in any subdirectory of this folder.
+    folder_path = sys.argv[1]
 
     # minimum length of filename to process will be this number + 1
     # do not change this number when running on same folder more than 1 times to avoid data loss
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     # set to False if not running by hand (ex: if using cronjob)
     # also, to redirect log output to some file, you can run this file like:
     # your_python_binary_location this_filename.py &>> log_filename_location
-    ask_confirmation = False
+    ask_confirmation = 1
 
     replace_longer_filenames_with_links_to_same_files_with_shorter_names(
         folder_path=folder_path,

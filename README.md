@@ -22,3 +22,13 @@ Structure of folder after:
 ```
 
 #### Make sure to not change max_allowed_filename_length argument in run_me.py after running in some folder once
+
+#### You should run run_me.py with &>> or other redirection operators to save logs to a file for future debugging purposes
+
+#### Here you also see _demo_folder_with_files testing folder that can be used to see how everything works for really long-name-having files
+
+## When running run_me.py file, pass full folder path that you want to process, for example:
+```bash
+/usr/bin/python3 run_me.py /home/your_name/some_folder_on_our_pc &>> your_log_file_location.log
+```
+
