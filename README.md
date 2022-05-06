@@ -29,6 +29,6 @@ Structure of folder after:
 
 ## When running run_me.py file, pass full folder path that you want to process, for example:
 ```bash
-/usr/bin/python3 run_me.py /home/your_name/some_folder_on_our_pc &>> your_log_file_location.log
+/usr/bin/python3 run_me.py /home/your_name/some_folder_on_our_pc earlier_than_now_minus_hours_number  &>> your_log_file_location.log
 ```
 

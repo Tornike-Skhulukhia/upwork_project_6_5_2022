@@ -28,6 +28,8 @@ import glob
 import logging
 import os
 import sys
+import traceback
+from datetime import datetime, timedelta
 
 # configure logging
 root = logging.getLogger()
@@ -89,18 +91,30 @@ def _process_long_name_having_file(
     )
 
 
-def _get_files_to_process(folder_path):
+def _get_last_modification_time_of_file(filepath):
+
+    return datetime.fromtimestamp(os.path.getmtime(filepath))
+
+
+def _get_files_to_process(folder_path, max_modification_datetime_to_allow):
     files_to_process = []
 
     for i in glob.glob(f"{folder_path}/**/*", recursive=True):
-
         if os.path.isfile(i):
+
+            # skip links
             if os.path.islink(i):
                 continue
 
-            if len(i.split("/")[-1]) > max_allowed_filename_length:
+            # skip newly modified files
+            if (
+                _get_last_modification_time_of_file(i)
+                <= max_modification_datetime_to_allow
+            ):
 
-                files_to_process.append(i)
+                if len(i.split("/")[-1]) > max_allowed_filename_length:
+
+                    files_to_process.append(i)
 
     return files_to_process
 
@@ -109,16 +123,25 @@ def replace_longer_filenames_with_links_to_same_files_with_shorter_names(
     folder_path,
     max_allowed_filename_length,
     ask_confirmation=True,
+    earlier_than_now_minus_hours=False,
 ):
+    if not folder_path.endswith("/"):
+        folder_path = folder_path + "/"
+
     # useful checks
-    assert (
-        folder_path.endswith("/")
-        and os.path.isdir(folder_path)
-        and sys.platform.lower() == "linux"
+    assert os.path.isdir(folder_path) and sys.platform.lower() == "linux"
+
+    max_modification_datetime_to_allow = (
+        datetime.now() - timedelta(hours=earlier_than_now_minus_hours)
+        if earlier_than_now_minus_hours
+        else datetime(9999, 1, 1)
     )
 
     # get list of files to process
-    files_to_process = _get_files_to_process(folder_path)
+    files_to_process = _get_files_to_process(
+        folder_path,
+        max_modification_datetime_to_allow=max_modification_datetime_to_allow,
+    )
 
     # wait to see if numbers seem correct
     print(f"Going to process {len(files_to_process)} files in {folder_path} ")
@@ -142,20 +165,33 @@ def replace_longer_filenames_with_links_to_same_files_with_shorter_names(
 
 # GO
 if __name__ == "__main__":
-    # all long files will be processed in any subdirectory of this folder.
-    folder_path = sys.argv[1]
+    try:
+        # all non-link long files will be processed in any subdirectory of this folder.
+        # if file was last modified before (current time - earlier_than_now_minus_hours)
 
-    # minimum length of filename to process will be this number + 1
-    # do not change this number when running on same folder more than 1 times to avoid data loss
-    max_allowed_filename_length = 143
+        if len(sys.argv[1:3]) != 2:
+            raise ValueError(
+                f"Please provide folder_path and earlier_than_now_minus_hours parameters when running the script"
+            )
 
-    # set to False if not running by hand (ex: if using cronjob)
-    # also, to redirect log output to some file, you can run this file like:
-    # your_python_binary_location this_filename.py &>> log_filename_location
-    ask_confirmation = 1
+        folder_path, earlier_than_now_minus_hours = sys.argv[1:3]
 
-    replace_longer_filenames_with_links_to_same_files_with_shorter_names(
-        folder_path=folder_path,
-        max_allowed_filename_length=max_allowed_filename_length,
-        ask_confirmation=ask_confirmation,
-    )
+        # minimum length of filename to process will be this number + 1
+        # do not change this number when running on same folder more than 1 times to avoid data loss
+        max_allowed_filename_length = 143
+
+        # set to False if not running by hand (ex: if using cronjob)
+        # also, to redirect log output to some file, you can run this file like:
+        # your_python_binary_location this_filename.py your_folder_path earlier_than_now_minus_hours_number &>> log_filename_location
+        ask_confirmation = 1
+
+        replace_longer_filenames_with_links_to_same_files_with_shorter_names(
+            folder_path=folder_path,
+            max_allowed_filename_length=max_allowed_filename_length,
+            ask_confirmation=ask_confirmation,
+            earlier_than_now_minus_hours=int(earlier_than_now_minus_hours),
+        )
+
+    except Exception as e:
+        logging.error(e)
+        logging.error(f"Full traceback: {traceback.format_exc()}")
