@@ -1,4 +1,4 @@
-# Upwork client repository
+# Upwork client project repository
 
 ### Short description:
 run_me.py allows for files that are not links and have very long names, rename their name to new - shorter names and create old long named files, but this time they are soft/symbolic links to new short-name-having files. 
